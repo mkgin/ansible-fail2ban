@@ -19,8 +19,10 @@
     state: directory
     mode: 0755
 
+# enable and restart
 - name: Enable and restart fail2ban in systemd
   systemd:
     name: fail2ban
     enabled: yes
     state: restarted
+
