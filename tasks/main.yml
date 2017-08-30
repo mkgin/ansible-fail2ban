@@ -1,0 +1,26 @@
+---
+- name: Install fail2ban
+  yum: name={{ item }} state=present
+  with_items: "{{ fail2ban_packages }}"
+- name: Configure fail2ban
+  template: src={{ item.src }} dest={{ item.dest }}
+            backup=yes mode=0644 owner=root group=root
+  with_items:
+    - { src: 'fail2ban.local.j2', dest: '{{ fail2ban_configdir }}/fail2ban.local' }
+    - { src: 'jail.local.j2', dest: '{{ fail2ban_configdir }}/jail.local' }
+    - { src: 'firewallcmd-ipset.local.j2', dest: '{{ fail2ban_configdir }}/action.d/firewallcmd-ipset.local' }
+  notify:
+    - restart fail2ban
+
+# Installation oddness, maybe when not using defaults
+- name: make sure /var/run/fail2ban is there
+  file:
+    path: /var/run/fail2ban
+    state: directory
+    mode: 0755
+
+- name: Enable and restart fail2ban in systemd
+  systemd:
+    name: fail2ban
+    enabled: yes
+    state: restarted
